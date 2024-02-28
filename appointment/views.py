@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
-from .forms import EditAvailabilityFormSet, CreateAppointmentForm
+from .forms import EditAvailabilityFormSet, CreateAppointmentForm, ServiceProviderFilterForm
 from django.contrib.auth.decorators import login_required, permission_required
 from django.db.models import Q
 
@@ -20,69 +20,60 @@ User = get_user_model()
     - login and signin +
 """
 
-def see_calendar(request, service_provider_id, *args, **kwargs):
-
-    context = {}
-
-    user = request.user
-
-    # calendar = Calendar.objects.select_related("availabilities").get(pk=service_provider_id)
-
-    # availabilities = calendar.availabilities.all()
-
-    # appointment = calendar.appointments.all()
-
-
-    # for avalability in availabilities:
-    #     start = (6, 15)
-    #     end = (7, 00)
-
-
-    # context = {
-    #     "calendar": calendar,
-    #     "availabilities": availabilities,
-    # }
-
-    return render(request=request, template_name="base.html", context=context)
-
 
 def search_service_provider(request):
 
     context = {}
 
-    service_providers = ServiceProvider.objects.all() 
+    service_providers = ServiceProvider.objects.all()
 
-    category = request.GET.get("category")
-    search = request.GET.get("search")
-    start_time = request.GET.get("start_time")
-    end_time = request.GET.get("end_time")
+    if request.method == "POST":
 
-    if category :
-        service_providers = service_providers.filter(category__value=category)
-        context["category"] = category
+        service_provider_filter_form = ServiceProviderFilterForm(data=request.POST)
+        context["form"] = service_provider_filter_form
 
-    if start_time :
-        service_providers = service_providers.filter(calendar__appointments__start_time__lte=parse_time(start_time))
-        context["start_time"] = start_time
+        if service_provider_filter_form.is_valid():
 
+            service_provider_filter_form
 
-    if end_time :
-        service_providers = service_providers.filter(calendar__appointments__end_time__gte=parse_time(end_time))
-        context["end_time"] = end_time
+            category = service_provider_filter_form.cleaned_data["category"]
+            town = service_provider_filter_form.cleaned_data["town"]
+            level_of_education = service_provider_filter_form.cleaned_data["level_of_education"]
+            day_of_week = service_provider_filter_form.cleaned_data["day_of_week"]
+            search = service_provider_filter_form.cleaned_data["search"]
+            start_time = service_provider_filter_form.cleaned_data["start_time"]
+            end_time = service_provider_filter_form.cleaned_data["end_time"]
 
+            if category :
+                service_providers = service_providers.filter(category__value=category)
 
-    if search :
-        service_providers = service_providers.filter(
-            Q(description__icontains=search) |
-            Q(user__first_name__icontains=search) |
-            Q(user__last_name__icontains=search) |
-            Q(town__icontains=search) |
-            Q(work__icontains=search)
-        )
-        context["search"] = search
+            if start_time and end_time:
+                pass
+            elif start_time :
+                service_providers = service_providers.filter(calendar__appointments__start_time__lte=parse_time(start_time))
+            elif end_time :
+                service_providers = service_providers.filter(calendar__appointments__end_time__gte=parse_time(end_time))
 
-    context["categories"] = Category.objects.all()
+            if level_of_education:
+                service_providers = service_providers.filter(level_of_education=level_of_education)
 
+            if day_of_week:
+                pass
+
+            if search :
+                service_providers = service_providers.filter(
+                    Q(description__icontains=search) |
+                    Q(user__first_name__icontains=search) |
+                    Q(user__last_name__icontains=search) |
+                    Q(town__icontains=search) |
+                    Q(work__icontains=search)
+                )
+
+            if town:
+                service_providers = service_providers.filter(town=town)
+    else:
+        service_provider_filter_form = ServiceProviderFilterForm()
+        context["form"] = service_provider_filter_form
 
     context["service_providers"] = service_providers
 
@@ -106,8 +97,6 @@ def service_provider_detail(request, service_provider_id):
 
             appointment = appointment.save(commit=False)
 
-
-
             appointment.attende = request.user
             appointment.calendar = calendar
 
@@ -130,12 +119,10 @@ def service_provider_detail(request, service_provider_id):
 
     return render(request=request, template_name="appointment/service_provider_detail.html", context=context)
 
+@login_required(login_url="login")
 def my_appointments(request):
 
     context = {}
-
-    if not request.user.is_authenticated:
-        return redirect("login")
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
 
@@ -150,25 +137,22 @@ def my_appointments(request):
 
     return render(request=request, template_name="appointment/my_appointments.html", context=context)
 
-
+@login_required(login_url="login")
 def accept_appointment(request, appointment_id):
-    if not request.user.is_authenticated:
-        return redirect("login")
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
     if not service_provider:
         return redirect("create_service_provider")
 
-    user = User.objects.get(pk=user.pk)
+    user = User.objects.get(pk=request.user.pk)
     pending_appointments = Appointment.objects.get(pk=appointment_id, calendar__owner=service_provider)
     pending_appointments.status = "ACCEPTED"
     pending_appointments.save()
 
     return redirect("my_appointments")
 
+@login_required(login_url="login")
 def cancel_appointment(request, appointment_id):
-    if not request.user.is_authenticated:
-        return redirect("login")
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
     if not service_provider:
@@ -180,9 +164,8 @@ def cancel_appointment(request, appointment_id):
 
     return redirect("my_appointments")
 
+@login_required(login_url="login")
 def reject_appointment(request, appointment_id):
-    if not request.user.is_authenticated:
-        return redirect("login")
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
     if not service_provider:
@@ -195,12 +178,11 @@ def reject_appointment(request, appointment_id):
     return redirect("my_appointments")
 
 
+@login_required(login_url="login")
 def edit_calendar(request):
 
-    if not request.user.is_authenticated:
-        return redirect("login")
-
     context = {}
+
     if request.method == "POST":
         user = request.user
 

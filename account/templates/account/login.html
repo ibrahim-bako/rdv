@@ -25,16 +25,15 @@
                 <label class="form-label" for="form2Example1">Nom d'utilisateur</label>
               <input type="username" name="username" id="form2Example1" class="form-control" />
             </div>
-        
             <div class="mb-4">
                 <label class="form-label" for="form2Example2">Mots de passe</label>
               <input type="password" name="password" id="form2Example2" class="form-control" />
             </div>
-          
+
             <input type="submit" class="btn btn-primary btn-block mb-4" value="Se connecter"/>
-          
+
             <div class="text-center">
-              {% comment %} <p>Pas de compte? <a href="{% url "register" %}">Crée un compte</a></p> {% endcomment %}
+              <p>Pas de compte? <a href="{% url "register" %}">Crée un compte</a></p>
               <button type="button" class="btn btn-link btn-floating mx-1">
                 <i class="fab fa-github"></i>
               </button>

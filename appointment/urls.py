@@ -1,7 +1,6 @@
 from django.urls import path
 
 from .views import (
-    see_calendar,
     edit_calendar,
     search_service_provider,
     my_appointments,
@@ -13,12 +12,11 @@ from .views import (
 
 urlpatterns = [
     path("", search_service_provider, name="home"),
-    
+
     path("calendar/edit", edit_calendar, name="edit_calendar"),
-    # path("see_calendar/<int:service_provider_id>", see_calendar, name="see_calendar"),
-    
+
     path("appointment/", my_appointments, name="my_appointments"),
-    
+
     path("service_provider/", search_service_provider, name="list_service_providers"),
     path("service_provider/<int:service_provider_id>", service_provider_detail, name="service_provider_detail"),
 
