@@ -5,58 +5,54 @@
     <div class="collapse navbar-collapse mx-4">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active link-dark" aria-current="page" href="{% url "list_service_providers" %}">Home</a>
+          <a class="nav-link link-dark" href="{% url "list_service_providers" %}">
+            {% url 'list_service_providers' as list_service_providers_url %}
+            <button type="button" class="btn btn-sm d-inline-block {% if request.get_full_path == list_service_providers_url %} btn-info {% else %} btn-secondary {% endif %}">Acceuill</button>
+          </a>
         </li>
+        {% if user.is_service_provider %}
+          <li class="nav-item">
+            <a class="nav-link link-dark" href="{% url "my_appointments" %}">
+              {% url 'my_appointments' as my_appointments_url %}
+              <button type="button" class="btn btn-sm d-inline-block {% if request.get_full_path == my_appointments_url %} btn-info {% else %} btn-secondary {% endif %}">Mes rendez-vous</button>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link link-dark" href="{% url "edit_calendar" %}">
+              {% url 'edit_calendar' as edit_calendar_url %}
+              <button type="button" class="btn btn-sm d-inline-block {% if request.get_full_path == edit_calendar_url %} btn-info {% else %} btn-secondary {% endif %}">Calendrier</button>
+            </a>
+          </li>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class=" d-inline-flex  justify-content-center gap-2">
+              <img src="{{ user.avatar_url }}" width="30" height="30" class=" rounded-circle ">
+              <div class=" fs-6 fw-semibold text-white ">{{ user }}</div>
+            </div>
+          </a>
+          <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url "logout" %}">Se Déconnecter</a></li>
+          </ul>
+        </li>
+        {% endif %}
+
+        {% if not user.is_authenticated %}
         <li class="nav-item">
-          <a class="nav-link link-dark" href="{% url "my_appointments" %}">Mes rendez-vous</a>
+          <a href="{% url "login" %}">
+            <button type="button" class="btn btn-secondary btn-sm d-inline-block ">Se Conecter</button>
+          </a>
         </li>
+        <div style="width: 10px;"></div>
         <li class="nav-item">
-          <a class="nav-link link-dark" href="{% url "edit_calendar" %}">Mon calendrier</a>
+          <a href="{% url "register" %}">
+            <button type="button" class="btn btn-info btn-sm d-inline-block ">Crée un compte</button>
+          </a>
         </li>
+        {% endif %}
       </ul>
     </div>
   </div>
 </nav>
-
-{% comment %} <div style="width: 100vw">
-  <style>
-    .navbar-brand {
-      color: #fff !important; /* Couleur du texte à gauche */
-    }
-
-    .navbar-nav {
-      margin-left: auto;
-    }
-
-    .navbar-nav a {
-      color: #000;
-      text-decoration: none;
-      margin-right: 15px;
-    }
-
-    .navbar-nav a:hover {
-      text-decoration: underline;
-    }
-
-    .nav-item.active a {
-      background-color: #007bff;
-      color: #fff;
-      border-radius: 5px;
-    }
-
-    .avatar {
-      margin-right: 10px;
-    }
-  </style>
-  <nav class="navbar navbar-expand-lg navbar-primary bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand fs-4 fw-bold " href="#">Nom du Site</a>
-      <div class="navbar-nav">
-        <a class="nav-link active " href="#">Accueil</a>
-        <button type="button" class="btn btn-secondary btn-sm py-1 ">Small button</button>
-        <a class="nav-link" href="#">Page 1</a>
-        <a class="nav-link" href="#">Page 2</a>
-      </div>
-    </div>
-  </nav>
-</div> {% endcomment %}

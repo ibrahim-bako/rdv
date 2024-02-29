@@ -23,8 +23,14 @@ class User(AbstractUser):
             return self.avatar.url
         return 'https://static.vecteezy.com/system/resources/previews/016/916/479/original/placeholder-icon-design-free-vector.jpg'
 
+    @property
+    def is_service_provider(self):
+        service_provider = ServiceProvider.objects.filter(user=self).first()
+        return service_provider is not None
+
+
     def __str__(self):
-        return f'{self.first_name} {self.last_name}' 
+        return f'{self.first_name} {self.last_name}'
 
 
 class Category(models.Model):

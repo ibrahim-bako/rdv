@@ -7,53 +7,62 @@ class RegisterForm(forms.Form):
 
     username = UsernameField(
         required=True,
+        label="Nom d'utilisateur: ",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
 
     password = forms.CharField(
         required=True,
+        label="Mots de passe :",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.PasswordInput(attrs={"class": "form-control", "type": "password"})
     )
 
     confirm_password = forms.CharField(
         required=True,
+        label="Confirmer le mots de passe :",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.PasswordInput(attrs={"class": "form-control", "type": "password"})
     )
 
     first_name = forms.CharField(
         required=True,
+        label="Prénom :",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
 
     last_name = forms.CharField(
         required=True,
+        label="Nom :",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
 
     phone_number = forms.CharField(
         required=True,
+        label="Téléphone :",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.TextInput(attrs={"class": "form-control"})
     )
 
     email = forms.EmailField(
         required=True,
+        label="Adresse email :",
         error_messages={"required": "Ce champs est obligatoire"},
         widget=forms.EmailInput(attrs={"class": "form-control", "type": "email"})
     )
 
     avatar = forms.FileField(
         required=False,
+        label="Métier",
         widget=forms.FileInput(attrs={"class": "form-control", "type": "file"})
     )
 
     is_service_provider = forms.BooleanField(
         required=False,
+        label="Je suis prestataire de service :",
         widget=forms.CheckboxInput(attrs={"class": "form-check-input", "type": "checkbox"})
     )
 

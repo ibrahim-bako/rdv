@@ -1,24 +1,17 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from .forms import EditAvailabilityFormSet, CreateAppointmentForm, ServiceProviderFilterForm
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from django.utils.dateparse import parse_time
 
 from .models import Calendar, Appointment, Availability
 
-from account.models import ServiceProvider, Category
+from account.models import ServiceProvider
 from account.forms import EditServiceProviderForm
 
 User = get_user_model()
-
-"""
-    - send notification
-    - research service provider +
-    - edit calendar availabilities +
-    - login and signin +
-"""
 
 
 def search_service_provider(request):
@@ -93,7 +86,6 @@ def service_provider_detail(request, service_provider_id):
             owner = User.objects.get(pk=service_provider.user.pk)
             calendar = Calendar.objects.get(owner=service_provider.pk)
             availabilities = Availability.objects.filter(calendar=calendar)
-            appointments = Appointment.objects.filter(calendar=calendar.pk)
 
             appointment = appointment.save(commit=False)
 
@@ -125,7 +117,6 @@ def my_appointments(request):
     context = {}
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
-
     if not service_provider:
         return redirect("create_service_provider")
 
@@ -144,7 +135,6 @@ def accept_appointment(request, appointment_id):
     if not service_provider:
         return redirect("create_service_provider")
 
-    user = User.objects.get(pk=request.user.pk)
     pending_appointments = Appointment.objects.get(pk=appointment_id, calendar__owner=service_provider)
     pending_appointments.status = "ACCEPTED"
     pending_appointments.save()
@@ -181,12 +171,14 @@ def reject_appointment(request, appointment_id):
 @login_required(login_url="login")
 def edit_calendar(request):
 
+    service_provider = ServiceProvider.objects.filter(user=request.user).first()
+    if not service_provider:
+        return redirect("create_service_provider")
+
     context = {}
 
     if request.method == "POST":
-        user = request.user
-
-        _service_provider = ServiceProvider.objects.get(user=user)
+        _service_provider = service_provider
         _calendar = Calendar.objects.get(owner=_service_provider.pk)
 
         edit_service_srovider_form = EditServiceProviderForm(data=request.POST, instance=_service_provider)
@@ -215,10 +207,8 @@ def edit_calendar(request):
             availability.end_time = parse_time(end_time)
             availability.save()
 
-    user = request.user
-
-    service_provider = ServiceProvider.objects.get(user=user)
-    calendar = Calendar.objects.get(owner=service_provider.pk)
+    service_provider = ServiceProvider.objects.filter(user=request.user).first()
+    calendar = Calendar.objects.filter(owner=service_provider.pk).first()
 
     edit_availability_formset = EditAvailabilityFormSet(calendar_id=calendar.pk)
     edit_service_srovider_form = EditServiceProviderForm(instance=service_provider)

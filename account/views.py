@@ -1,11 +1,16 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login as dj_login, authenticate, logout
+from django.contrib.auth import login as dj_login, authenticate, logout as dj_logout
 from django.contrib.auth.decorators import login_required
 
 from .models import User, ServiceProvider
 from appointment.models import Calendar, Availability
 
 from .forms import RegisterForm, EditServiceProviderForm
+
+
+def logout(request):
+    dj_logout(request=request)
+    return redirect("home")
 
 def login(request):
 
@@ -85,6 +90,8 @@ def register(request):
 
         if is_service_provider:
             return redirect("become_service_provider")
+        else:
+            return register("home")
 
     context["register_form"] = RegisterForm()
 
