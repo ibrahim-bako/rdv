@@ -96,10 +96,10 @@ class ServiceProviderFilterForm(forms.Form):
     search = forms.CharField(
         label="Recherche",
         required=False,
-        widget=forms.TextInput(attrs={"class": "form-control me-2 w-10"})
+        widget=forms.TextInput(attrs={"class": "form-control me-2 w-10", "placeholder": "Rechercher"})
     )
 
-    DAYS_OF_WEEK = Availability.DAYS_OF_WEEK
+    DAYS_OF_WEEK = Availability.DAYS_OF_WEEK.copy()
     DAYS_OF_WEEK.insert(0, ("", "-------"))
     day_of_week = forms.ChoiceField(
         choices=DAYS_OF_WEEK,
@@ -120,7 +120,7 @@ class ServiceProviderFilterForm(forms.Form):
         widget=forms.TimeInput(attrs={"class": "form-control", "type": "time", "style": "width: 80px"})
     )
 
-    TOWNS = ServiceProvider.TOWNS
+    TOWNS = ServiceProvider.TOWNS.copy()
     TOWNS.insert(0, ("", "-------"))
     town = forms.ChoiceField(
         choices=TOWNS,
@@ -129,10 +129,10 @@ class ServiceProviderFilterForm(forms.Form):
         widget=forms.Select(attrs={"class": "form-select", "style": "width: 160px"})
     )
 
-    LEVEL_OF_EDUCATION = ServiceProvider.LEVEL_OF_EDUCATION
+    LEVEL_OF_EDUCATION = ServiceProvider.LEVEL_OF_EDUCATION.copy()
     LEVEL_OF_EDUCATION.insert(0, ("", "-------"))
     level_of_education = forms.ChoiceField(
-        choices=ServiceProvider.LEVEL_OF_EDUCATION,
+        choices=LEVEL_OF_EDUCATION,
         label="Education",
         required=False,
         widget=forms.Select(attrs={"class": "form-select", "style": "width: 100px"})

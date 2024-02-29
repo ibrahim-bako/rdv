@@ -21,7 +21,7 @@ class User(AbstractUser):
     def avatar_url(self):
         if self.avatar and hasattr(self.avatar, 'url'):
             return self.avatar.url
-        return 'https://static.vecteezy.com/system/resources/previews/016/916/479/original/placeholder-icon-design-free-vector.jpg'
+        return 'https://st4.depositphotos.com/4329009/19956/v/450/depositphotos_199564354-stock-illustration-creative-vector-illustration-default-avatar.jpg'
 
     @property
     def is_service_provider(self):

@@ -1,4 +1,5 @@
 from django.urls import path
+from django.shortcuts import redirect
 
 from .views import (
     edit_calendar,
@@ -11,7 +12,7 @@ from .views import (
 )
 
 urlpatterns = [
-    path("", search_service_provider, name="home"),
+    path("", lambda _: redirect("list_service_providers"), name="home"),
 
     path("calendar/edit", edit_calendar, name="edit_calendar"),
 

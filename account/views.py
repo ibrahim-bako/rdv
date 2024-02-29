@@ -34,6 +34,8 @@ def login(request):
             context["errors"].append("Vos identifiant sont incorect")
         else:
             dj_login(request=request, user=user)
+            if request.GET.get("next") is None:
+                return redirect("home")
 
     return render(request=request, template_name="account/login.html", context=context)
 
@@ -91,7 +93,8 @@ def register(request):
         if is_service_provider:
             return redirect("become_service_provider")
         else:
-            return register("home")
+            if request.GET.get("next") is None:
+                return redirect("home")
 
     context["register_form"] = RegisterForm()
 
@@ -119,10 +122,10 @@ def become_service_provider(request):
 
             calendar = Calendar.objects.create(owner=service_provider)
 
-            for day in Availability.DAYS_OF_WEEK:
+            for (day, _) in Availability.DAYS_OF_WEEK:
                 Availability.objects.create(day_of_week=day, calendar=calendar)
 
-            return redirect("home")
+            return redirect("edit_calendar")
 
     context["edit_service_provider_form"] = EditServiceProviderForm()
 

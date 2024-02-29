@@ -27,8 +27,6 @@ def search_service_provider(request):
 
         if service_provider_filter_form.is_valid():
 
-            service_provider_filter_form
-
             category = service_provider_filter_form.cleaned_data["category"]
             town = service_provider_filter_form.cleaned_data["town"]
             level_of_education = service_provider_filter_form.cleaned_data["level_of_education"]
@@ -40,18 +38,16 @@ def search_service_provider(request):
             if category :
                 service_providers = service_providers.filter(category__value=category)
 
-            if start_time and end_time:
-                pass
-            elif start_time :
-                service_providers = service_providers.filter(calendar__appointments__start_time__lte=parse_time(start_time))
-            elif end_time :
-                service_providers = service_providers.filter(calendar__appointments__end_time__gte=parse_time(end_time))
+            if day_of_week:
+                service_providers = service_providers.filter(calendar__availabilities__day_of_week=day_of_week)
+
+            if start_time :
+                service_providers = service_providers.filter(calendar__availabilities__start_time__lte=start_time)
+            if end_time :
+                service_providers = service_providers.filter(calendar__availabilities__end_time__gte=end_time)
 
             if level_of_education:
                 service_providers = service_providers.filter(level_of_education=level_of_education)
-
-            if day_of_week:
-                pass
 
             if search :
                 service_providers = service_providers.filter(
@@ -68,7 +64,7 @@ def search_service_provider(request):
         service_provider_filter_form = ServiceProviderFilterForm()
         context["form"] = service_provider_filter_form
 
-    context["service_providers"] = service_providers
+    context["service_providers"] = service_providers.distinct()
 
     return render(request=request, template_name="appointment/search_service_provider.html", context=context)
 
@@ -111,7 +107,7 @@ def service_provider_detail(request, service_provider_id):
 
     return render(request=request, template_name="appointment/service_provider_detail.html", context=context)
 
-@login_required(login_url="login")
+@login_required(login_url="login", redirect_field_name="my_appointments")
 def my_appointments(request):
 
     context = {}
@@ -128,7 +124,7 @@ def my_appointments(request):
 
     return render(request=request, template_name="appointment/my_appointments.html", context=context)
 
-@login_required(login_url="login")
+@login_required(login_url="login", redirect_field_name="my_appointments")
 def accept_appointment(request, appointment_id):
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
@@ -141,7 +137,7 @@ def accept_appointment(request, appointment_id):
 
     return redirect("my_appointments")
 
-@login_required(login_url="login")
+@login_required(login_url="login", redirect_field_name="my_appointments")
 def cancel_appointment(request, appointment_id):
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
@@ -154,7 +150,7 @@ def cancel_appointment(request, appointment_id):
 
     return redirect("my_appointments")
 
-@login_required(login_url="login")
+@login_required(login_url="login", redirect_field_name="my_appointments")
 def reject_appointment(request, appointment_id):
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
@@ -168,7 +164,7 @@ def reject_appointment(request, appointment_id):
     return redirect("my_appointments")
 
 
-@login_required(login_url="login")
+@login_required(login_url="login", redirect_field_name="edit_calendar")
 def edit_calendar(request):
 
     service_provider = ServiceProvider.objects.filter(user=request.user).first()
