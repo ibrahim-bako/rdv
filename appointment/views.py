@@ -39,7 +39,11 @@ def search_service_provider(request):
                 service_providers = service_providers.filter(category__value=category)
 
             if day_of_week:
-                service_providers = service_providers.filter(calendar__availabilities__day_of_week=day_of_week)
+                service_providers = service_providers.filter(
+                    Q(calendar__availabilities__day_of_week=day_of_week) and
+                    Q(calendar__availabilities__start_time__isnull=False) and
+                    Q(calendar__availabilities__end_time__isnull=False)
+                )
 
             if start_time :
                 service_providers = service_providers.filter(calendar__availabilities__start_time__lte=start_time)

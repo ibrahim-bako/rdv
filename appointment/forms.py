@@ -78,6 +78,7 @@ EditAvailabilityFormSet = modelformset_factory(
     formset=BaseAvailabilityFormSet,
     # form=EditAvailabilityForm,
     fields=["day_of_week", "start_time", "end_time"],
+    min_num=7,
     max_num=7,
     labels={
         "day_of_week": False,
