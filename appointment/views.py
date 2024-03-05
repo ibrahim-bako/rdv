@@ -4,6 +4,8 @@ from .forms import EditAvailabilityFormSet, CreateAppointmentForm, ServiceProvid
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
+from django.core.mail import send_mail
+
 from django.utils.dateparse import parse_time
 
 from .models import Calendar, Appointment, Availability
@@ -94,6 +96,24 @@ def service_provider_detail(request, service_provider_id):
 
             appointment.save()
 
+            send_mail(
+                subject="Demande de rendez-vous",
+                message=service_provider_appointment_request(service_provider=service_provider, user=request.user, appointment=appointment),
+                html_message=service_provider_appointment_request(service_provider=service_provider, user=request.user, appointment=appointment),
+                from_email= "rdv.uvbf@gmail.com",
+                recipient_list=[service_provider.email],
+                fail_silently=False,
+            )
+
+            send_mail(
+                subject="Demande de rendez-vous",
+                message=user_appointment_request(service_provider=service_provider, user=request.user, appointment=appointment),
+                html_message=user_appointment_request(service_provider=service_provider, user=request.user, appointment=appointment),
+                from_email= "rdv.uvbf@gmail.com",
+                recipient_list=[request.user.email],
+                fail_silently=False,
+            )
+
             return redirect("home")
 
     appointment_form = CreateAppointmentForm()
@@ -139,6 +159,15 @@ def accept_appointment(request, appointment_id):
     pending_appointments.status = "ACCEPTED"
     pending_appointments.save()
 
+    send_mail(
+        subject="Demande de rendez-vous accepter",
+        message=user_appointment_accepted(service_provider=service_provider, user=pending_appointments.attende, appointment=pending_appointments),
+        html_message=user_appointment_accepted(service_provider=service_provider, user=pending_appointments.attende, appointment=pending_appointments),
+        from_email= "rdv.uvbf@gmail.com",
+        recipient_list=[pending_appointments.attende.email],
+        fail_silently=False,
+    )
+
     return redirect("my_appointments")
 
 @login_required(login_url="login", redirect_field_name="my_appointments")
@@ -152,6 +181,15 @@ def cancel_appointment(request, appointment_id):
     pending_appointments.status = "CANCELLED"
     pending_appointments.save()
 
+    send_mail(
+        subject="Demande de rendez-vous annuler",
+        message=user_appointment_cancelled(service_provider=service_provider, user=pending_appointments.attende, appointment=pending_appointments),
+        html_message=user_appointment_cancelled(service_provider=service_provider, user=pending_appointments.attende, appointment=pending_appointments),
+        from_email= "rdv.uvbf@gmail.com",
+        recipient_list=[pending_appointments.attende.email],
+        fail_silently=False,
+    )
+
     return redirect("my_appointments")
 
 @login_required(login_url="login", redirect_field_name="my_appointments")
@@ -164,6 +202,15 @@ def reject_appointment(request, appointment_id):
     pending_appointments = Appointment.objects.get(pk=appointment_id)
     pending_appointments.status = "REJECTED"
     pending_appointments.save()
+
+    send_mail(
+        subject="Demande de rendez-vous annuler",
+        message=user_appointment_rejected(service_provider=service_provider, user=pending_appointments.attende, appointment=pending_appointments),
+        html_message=user_appointment_rejected(service_provider=service_provider, user=pending_appointments.attende, appointment=pending_appointments),
+        from_email= "rdv.uvbf@gmail.com",
+        recipient_list=[pending_appointments.attende.email],
+        fail_silently=False,
+    )
 
     return redirect("my_appointments")
 
@@ -219,152 +266,68 @@ def edit_calendar(request):
     return render(request=request, template_name="appointment/edit_calendar.html", context=context)
 
 
-DAY_HOURS_15 = [
-    (0, 00),
-    (0, 15),
-    (0, 30),
-    (0, 45),
-    (1, 00),
-    (1, 15),
-    (1, 30),
-    (1, 45),
-    (2, 00),
-    (2, 15),
-    (2, 30),
-    (2, 45),
-    (3, 00),
-    (3, 15),
-    (3, 30),
-    (3, 45),
-    (4, 00),
-    (4, 15),
-    (4, 30),
-    (4, 45),
-    (5, 00),
-    (5, 15),
-    (5, 30),
-    (5, 45),
-    (6, 00),
-    (6, 15),
-    (6, 30),
-    (6, 45),
-    (7, 00),
-    (7, 15),
-    (7, 30),
-    (7, 45),
-    (8, 00),
-    (8, 15),
-    (8, 30),
-    (8, 45),
-    (9, 00),
-    (9, 15),
-    (9, 30),
-    (9, 45),
-    (10, 00),
-    (10, 15),
-    (10, 30),
-    (10, 45),
-    (11, 00),
-    (11, 15),
-    (11, 30),
-    (11, 45),
-    (12, 00),
-    (12, 15),
-    (12, 30),
-    (12, 45),
-    (13, 00),
-    (13, 15),
-    (13, 30),
-    (13, 45),
-    (14, 00),
-    (14, 15),
-    (14, 30),
-    (14, 45),
-    (15, 00),
-    (15, 15),
-    (15, 30),
-    (15, 45),
-    (16, 00),
-    (16, 15),
-    (16, 30),
-    (16, 45),
-    (17, 00),
-    (17, 15),
-    (17, 30),
-    (17, 45),
-    (18, 00),
-    (18, 15),
-    (18, 30),
-    (18, 45),
-    (19, 00),
-    (19, 15),
-    (19, 30),
-    (19, 45),
-    (20, 00),
-    (20, 15),
-    (20, 30),
-    (20, 45),
-    (21, 00),
-    (21, 15),
-    (21, 30),
-    (21, 45),
-    (22, 00),
-    (22, 15),
-    (22, 30),
-    (22, 45),
-    (23, 00),
-    (23, 15),
-    (23, 30),
-    (23, 45),
-]
+def service_provider_appointment_request(service_provider, user, appointment):
+    return f"""
+    <body>
+        <div>
+            <h4>Bonjour, <strong>{service_provider.user}</strong></h4>
+            <p>
+                Vous venez de recevoir une demande de rendez-vous de <strong>{user}</strong> le <strong>{appointment.date} à {appointment.start_time}</strong>.
+                <cite>
+                    {appointment.message}
+                </cite>
+            </p>
+        </div>
+    </body>
+"""
 
-DAY_HOURS_30 = [
-    (0, 00),
-    (0, 30),
-    (1, 00),
-    (1, 30),
-    (2, 00),
-    (2, 30),
-    (3, 00),
-    (3, 30),
-    (4, 00),
-    (4, 30),
-    (5, 00),
-    (5, 30),
-    (6, 00),
-    (6, 30),
-    (7, 00),
-    (7, 30),
-    (8, 00),
-    (8, 30),
-    (9, 00),
-    (9, 30),
-    (10, 00),
-    (10, 30),
-    (11, 00),
-    (11, 30),
-    (12, 00),
-    (12, 30),
-    (13, 00),
-    (13, 30),
-    (14, 00),
-    (14, 30),
-    (15, 00),
-    (15, 30),
-    (16, 00),
-    (16, 30),
-    (17, 00),
-    (17, 30),
-    (18, 00),
-    (18, 30),
-    (19, 00),
-    (19, 30),
-    (20, 00),
-    (20, 30),
-    (21, 00),
-    (21, 30),
-    (22, 00),
-    (22, 30),
-    (23, 00),
-    (23, 30),
-]
+def user_appointment_request(service_provider, user, appointment):
+    return f"""
+    <body>
+        <div>
+            <h4>Bonjour, <strong>{user}</strong></h4>
+            <p>
+                Vous avez demandé un rendez-vous à <strong>{service_provider.user}</strong> pour le <strong>{appointment.date} à {appointment.start_time}</strong>.
+            </p>
+        </div>
+    </body>
+"""
+
+def user_appointment_accepted(service_provider, user, appointment):
+
+    return f"""
+    <body>
+        <div>
+            <h4>Bonjour, <strong>{user}</strong></h4>
+            <p>
+                Votre demande de rendez-vous à <strong>{service_provider.user}</strong> pour le <strong>{appointment.date} à {appointment.start_time}</strong> a été <strong>accepter</strong>.
+            </p>
+        </div>
+    </body>
+"""
+
+def user_appointment_cancelled(service_provider, user, appointment):
+
+    return f"""
+    <body>
+        <div>
+            <h4>Bonjour, <strong>{user}</strong></h4>
+            <p>
+                Votre demande de rendez-vous à <strong>{service_provider.user}</strong> pour le <strong>{appointment.date} à {appointment.start_time}</strong> a été <strong>annuler</strong>.
+            </p>
+        </div>
+    </body>
+"""
+
+def user_appointment_rejected(service_provider, user, appointment):
+
+    return f"""
+    <body>
+        <div>
+            <h4>Bonjour, <strong>{user}</strong></h4>
+            <p>
+                Votre demande de rendez-vous à <strong>{service_provider.user}</strong> pour le <strong>{appointment.date} à {appointment.start_time}</strong> a été <strong>rejeter</strong>.
+            </p>
+        </div>
+    </body>
+"""
