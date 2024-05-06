@@ -4,8 +4,8 @@ from .forms import EditAvailabilityFormSet, CreateAppointmentForm, ServiceProvid
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
-from django.core.mail import send_mail
-
+from django.core.mail import send_mail as django_send_mail
+from rdv.settings import DEBUG
 from django.utils.dateparse import parse_time
 
 from .models import Calendar, Appointment, Availability
@@ -14,6 +14,14 @@ from account.models import ServiceProvider
 from account.forms import EditServiceProviderForm
 
 User = get_user_model()
+
+
+
+def send_mail(*args, **kwargs):
+    if DEBUG:
+        pass
+    else:
+        django_send_mail(*args, **kwargs)
 
 
 def search_service_provider(request):
@@ -101,7 +109,7 @@ def service_provider_detail(request, service_provider_id):
                 message=service_provider_appointment_request(service_provider=service_provider, user=request.user, appointment=appointment),
                 html_message=service_provider_appointment_request(service_provider=service_provider, user=request.user, appointment=appointment),
                 from_email= "rdv.uvbf@gmail.com",
-                recipient_list=[service_provider.email],
+                recipient_list=[owner.email],
                 fail_silently=False,
             )
 

@@ -38,6 +38,30 @@
                 {% for f in form %}
                 <div class="mx-2">{{f}}</div>
                 {% endfor %}
+                <button
+                  type="button"
+                  id="{{form.prefix}}"
+                  class="btn btn-danger"
+                >
+                  X
+                </button>
+                <script>
+                  document
+                    .getElementById("{{form.prefix}}")
+                    .addEventListener("click", () => {
+                      const prefix = "{{form.prefix}}";
+                      const startEl = document.getElementById(
+                        `id_${prefix}-start_time`
+                      );
+                      const endEl = document.getElementById(
+                        `id_${prefix}-end_time`
+                      );
+
+                      console.log(`id_${prefix}-start_time`);
+                      startEl.value = null;
+                      endEl.value = null;
+                    });
+                </script>
               </div>
               {% endfor %}
             </div>
@@ -45,7 +69,7 @@
         </div>
       </div>
     </div>
-    <button type="submit" class="btn btn-primary mx-4 ">Enregistrer</button>
+    <button type="submit" class="btn btn-primary mx-4">Enregistrer</button>
   </form>
 </div>
 {% endblock content %}
