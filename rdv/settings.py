@@ -157,4 +157,4 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'rdv.uvbf@gmail.com'
-EMAIL_HOST_PASSWORD ='mder wakm hzhp zqjn ' #Your gmail Password 
+EMAIL_HOST_PASSWORD ='cgqq yrkr genb wptv' #Your gmail Password 

@@ -18,10 +18,7 @@ User = get_user_model()
 
 
 def send_mail(*args, **kwargs):
-    if DEBUG:
-        pass
-    else:
-        django_send_mail(*args, **kwargs)
+    django_send_mail(*args, **kwargs)
 
 
 def search_service_provider(request):
